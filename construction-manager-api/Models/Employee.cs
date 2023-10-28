@@ -8,10 +8,25 @@ public class Employee
     public decimal Payroll { get; set; }
 
     // relationships
-    public Department Department { get; set; } //M-1
-    public Project Project { get; set; } //M-1
-    public ICollection<Skill> Skills { get; private set; } //1-M
     
+    public Guid DepartmentId { get; set; }
+    public Department Department { get; set; } //M-1
+    
+    public Guid ProjectId { get; set; }
+    public virtual Project? Project { get; set; } //M-1
+    public virtual ICollection<Skill> Skills { get; private set; } //1-M
+
+    public Employee(string name, string title, decimal payroll, Guid departmentId, Department department, Guid projectId, ICollection<Skill> skills)
+    {
+        Name = name;
+        Title = title;
+        Payroll = payroll;
+        DepartmentId = departmentId;
+        Department = department;
+        ProjectId = projectId;
+        Skills = skills;
+    }
+
     // helpers
     public void AddSkill(Skill skill)
     {

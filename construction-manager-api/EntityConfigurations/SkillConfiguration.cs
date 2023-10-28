@@ -8,6 +8,10 @@ public class SkillConfiguration : IEntityTypeConfiguration<Skill>
 {
     public void Configure(EntityTypeBuilder<Skill> builder)
     {
-        throw new NotImplementedException();
+        builder.ToTable("skills");
+        
+        builder.Property(s => s.Name).HasColumnName("name");
+
+        builder.HasKey("id");
     }
 }

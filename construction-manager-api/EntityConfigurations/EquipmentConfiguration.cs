@@ -8,6 +8,10 @@ public class EquipmentConfiguration : IEntityTypeConfiguration<Equipment>
 {
     public void Configure(EntityTypeBuilder<Equipment> builder)
     {
-        throw new NotImplementedException();
+        builder.ToTable("equipments");
+        
+        builder.Property(e => e.Name).HasColumnName("name");
+
+        builder.HasKey("id");
     }
 }

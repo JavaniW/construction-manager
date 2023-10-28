@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using construction_manager_api.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace construction_manager_api.Controllers;
 
@@ -6,6 +7,14 @@ namespace construction_manager_api.Controllers;
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
 {
+    private readonly ConstructionManagerContext db;
+
+    public WeatherForecastController(ConstructionManagerContext db, ILogger<WeatherForecastController> logger)
+    {
+        this.db = db;
+        _logger = logger;
+    }
+
     private static readonly string[] Summaries = new[]
     {
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -13,10 +22,7 @@ public class WeatherForecastController : ControllerBase
 
     private readonly ILogger<WeatherForecastController> _logger;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger)
-    {
-        _logger = logger;
-    }
+    
 
     [HttpGet(Name = "GetWeatherForecast")]
     public IEnumerable<WeatherForecast> Get()

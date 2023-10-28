@@ -12,8 +12,12 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
 
         builder.HasKey(p => p.Id);
 
-        builder.Property(p => p.Expenses).IsRequired();
+        builder.Property(p => p.Id).HasColumnName("id");
+        builder.Property(p => p.Expenses).IsRequired().HasColumnName("expenses");
 
-        builder.HasOne(p => p.Location).WithMany().HasForeignKey(p => p.);
+        builder.HasOne<Location>(p => p.Location).WithMany().HasForeignKey(p => p.LocationId);
+        builder.HasMany<Employee>(p => p.Employees).WithOne(e => e.Project).HasForeignKey(p => p.ProjectId);
+        builder.HasMany<Skill>(p => p.RequiredSkills).WithMany().UsingEntity("projects_skills");
+        builder.HasMany<Equipment>(p => p.RequiredEquipments).WithMany().UsingEntity("projects_equipments");
     }
 }

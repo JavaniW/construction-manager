@@ -8,6 +8,10 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
 {
     public void Configure(EntityTypeBuilder<Location> builder)
     {
-        throw new NotImplementedException();
+        builder.ToTable("locations");
+        
+        builder.Property(l => l.Name).HasColumnName("name");
+
+        builder.HasKey("id");
     }
 }
