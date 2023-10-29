@@ -1,46 +1,25 @@
-namespace construction_manager_api.Models;
+﻿using System;
+using System.Collections.Generic;
+
+namespace construction_manager_api;
 
 public class Employee
 {
-    public Guid Id { get; private set; } = new Guid();
-    public string Name { get; set; }
-    public string Title { get; set; }
+    public Guid Id { get; set; }
+
+    public string Name { get; set; } = null!;
+
+    public string Title { get; set; } = null!;
+
     public decimal Payroll { get; set; }
 
-    // relationships
-    
-    public Guid DepartmentId { get; set; }
-    public Department Department { get; set; } //M-1
-    
-    public Guid ProjectId { get; set; }
-    public virtual Project? Project { get; set; } //M-1
-    public virtual ICollection<Skill> Skills { get; private set; } //1-M
+    // public int? DepartmentId { get; set; }
 
-    public Employee(string name, string title, decimal payroll, Guid departmentId, Department department, Guid projectId, ICollection<Skill> skills)
-    {
-        Name = name;
-        Title = title;
-        Payroll = payroll;
-        DepartmentId = departmentId;
-        Department = department;
-        ProjectId = projectId;
-        Skills = skills;
-    }
+    // public Guid? ProjectId { get; set; }
 
-    // helpers
-    public void AddSkill(Skill skill)
-    {
-        Skills.Add(skill);
-    }
+    public virtual Department? Department { get; set; }
 
-    public void RemoveSkill(int skillId)
-    {
-        Skill toRemove = Skills.Single(s => s.Id == skillId);
-        Skills.Remove(toRemove);
-    }
+    public virtual Project? Project { get; set; }
 
-    public void ChangeDepartment(Department dept)
-    {
-        Department = dept;
-    }
+    public virtual ICollection<Skill> Skills { get; set; } = new List<Skill>();
 }

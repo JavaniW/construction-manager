@@ -1,13 +1,15 @@
-namespace construction_manager_api.Models;
+﻿using System;
+using System.Collections.Generic;
+
+namespace construction_manager_api;
 
 public class Skill
 {
-    public int Id { get; private set; }
-    public string Name { get; set; }
+    public int Id { get; set; }
 
-    public Skill(int id, string name)
-    {
-        Id = id;
-        Name = name;
-    }
+    public string Name { get; set; } = null!;
+
+    // public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
+    //
+    // public virtual ICollection<Project> Projects { get; set; } = new List<Project>();
 }

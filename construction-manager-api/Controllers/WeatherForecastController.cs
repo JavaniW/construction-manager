@@ -1,5 +1,6 @@
 ﻿using construction_manager_api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace construction_manager_api.Controllers;
 
@@ -7,9 +8,9 @@ namespace construction_manager_api.Controllers;
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
 {
-    private readonly ConstructionManagerContext db;
+    private readonly ConstructionManagerDbContext db;
 
-    public WeatherForecastController(ConstructionManagerContext db, ILogger<WeatherForecastController> logger)
+    public WeatherForecastController(ConstructionManagerDbContext db, ILogger<WeatherForecastController> logger)
     {
         this.db = db;
         _logger = logger;
@@ -25,15 +26,11 @@ public class WeatherForecastController : ControllerBase
     
 
     [HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecast> Get()
+    public Employee Get()
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        })
-        .ToArray();
+        var employee = db.Employees.Single(x => x.Id.Equals(new Guid("c941f441-d47a-46cb-b0c9-01679ba500dd")));
+        _logger.LogWarning("Employee is: {employee}", employee.Id);
+        return employee;
     }
 }
 

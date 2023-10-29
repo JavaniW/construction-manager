@@ -8,10 +8,13 @@ public class SkillConfiguration : IEntityTypeConfiguration<Skill>
 {
     public void Configure(EntityTypeBuilder<Skill> builder)
     {
-        builder.ToTable("skills");
-        
-        builder.Property(s => s.Name).HasColumnName("name");
+        builder.HasKey(e => e.Id).HasName("PRIMARY");
 
-        builder.HasKey("id");
+        builder.ToTable("skills");
+
+        builder.Property(e => e.Id).HasColumnName("id");
+        builder.Property(e => e.Name)
+            .HasMaxLength(50)
+            .HasColumnName("name");
     }
 }

@@ -4,19 +4,28 @@ using Microsoft.EntityFrameworkCore.Internal;
 
 namespace construction_manager_api.Models;
 
-public class ConstructionManagerContext : DbContext
+public partial class ConstructionManagerDbContext : DbContext
 {
-    public DbSet<Department> Departments { get; set; }
-    public DbSet<Employee> Employees { get; set; }
-    public DbSet<Equipment> Equipments { get; set; }
-    public DbSet<Location> Locations { get; set; }
-    public DbSet<Project> Projects { get; set; }
-    public DbSet<Skill> Skills { get; set; }
-
-    public ConstructionManagerContext(DbContextOptions options) : base(options)
+    public ConstructionManagerDbContext()
     {
-    
     }
+
+    public ConstructionManagerDbContext(DbContextOptions<ConstructionManagerDbContext> options)
+        : base(options)
+    {
+    }
+
+    public virtual DbSet<Department> Departments { get; set; }
+    
+    public virtual DbSet<Employee> Employees { get; set; }
+
+    public virtual DbSet<Equipment> Equipments { get; set; }
+
+    public virtual DbSet<Location> Locations { get; set; }
+
+    public virtual DbSet<Project> Projects { get; set; }
+
+    public virtual DbSet<Skill> Skills { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,4 +37,6 @@ public class ConstructionManagerContext : DbContext
         modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
         base.OnModelCreating(modelBuilder);
     }
+    
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

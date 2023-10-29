@@ -8,10 +8,13 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
 {
     public void Configure(EntityTypeBuilder<Department> builder)
     {
-        builder.ToTable("departments");
-        
-        builder.HasKey(d => d.Id);
+        builder.HasKey(e => e.Id).HasName("PRIMARY");
 
-        builder.Property(d => d.Name).HasColumnName("name").IsRequired();
+        builder.ToTable("departments");
+
+        builder.Property(e => e.Id).HasColumnName("id");
+        builder.Property(e => e.Name)
+            .HasMaxLength(50)
+            .HasColumnName("name");
     }
 }
