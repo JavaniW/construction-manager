@@ -8,10 +8,13 @@ public class EquipmentConfiguration : IEntityTypeConfiguration<Equipment>
 {
     public void Configure(EntityTypeBuilder<Equipment> builder)
     {
-        builder.ToTable("equipments");
-        
-        builder.Property(e => e.Name).HasColumnName("name");
+        builder.HasKey(e => e.Id).HasName("PRIMARY");
 
-        builder.HasKey("id");
+        builder.ToTable("equipments");
+
+        builder.Property(e => e.Id).HasColumnName("id");
+        builder.Property(e => e.Name)
+            .HasMaxLength(50)
+            .HasColumnName("name");
     }
 }

@@ -8,10 +8,13 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
 {
     public void Configure(EntityTypeBuilder<Location> builder)
     {
-        builder.ToTable("locations");
-        
-        builder.Property(l => l.Name).HasColumnName("name");
+        builder.HasKey(e => e.Id).HasName("PRIMARY");
 
-        builder.HasKey("id");
+        builder.ToTable("locations");
+
+        builder.Property(e => e.Id).HasColumnName("id");
+        builder.Property(e => e.Name)
+            .HasMaxLength(255)
+            .HasColumnName("name");
     }
 }
