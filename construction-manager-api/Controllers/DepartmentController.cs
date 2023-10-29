@@ -8,8 +8,8 @@ namespace construction_manager_api.Controllers;
 [ApiController]
 public class DepartmentController : ControllerBase
 {
-    private readonly ConstructionManagerContext _context;
-    public DepartmentController(ConstructionManagerContext context)
+    private readonly ConstructionManagerDbContext _context;
+    public DepartmentController(ConstructionManagerDbContext context)
     {
         _context = context;
     }
@@ -64,7 +64,7 @@ public class DepartmentController : ControllerBase
     public ActionResult<Department> PostDepartment(Department department)
     {
         //Create new department using attributes of department ogj
-        var createDepartment = new Department(department.Id, department.Name);
+        var createDepartment = new Department();
 
         _context.Departments.Add(createDepartment);
         _context.SaveChangesAsync();

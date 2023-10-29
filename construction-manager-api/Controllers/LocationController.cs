@@ -8,8 +8,8 @@ namespace construction_manager_api.Controllers;
 [ApiController]
 public class LocationController : ControllerBase
 {
-    private readonly ConstructionManagerContext _context;
-    public LocationController(ConstructionManagerContext context)
+    private readonly ConstructionManagerDbContext _context;
+    public LocationController(ConstructionManagerDbContext context)
     {
         _context = context;
     }
@@ -31,10 +31,10 @@ public class LocationController : ControllerBase
 
     // PUT: api/Location/2
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutLocation(long id, Location location)
+    public async Task<IActionResult> PutLocation(Guid id, Location location)
     {
         //Udate location with passed id using the attributes of the passed location obj
-        if (id != location.Id)
+        if (!id.Equals(location.Id))
         {
             return BadRequest();
         }
@@ -64,7 +64,7 @@ public class LocationController : ControllerBase
     public ActionResult<Location> PostLocation(Location location)
     {
         //Create new location using attributes of location ogj
-        var createLocation = new Location(location.Id, location.Name);
+        var createLocation = new Location();
 
         _context.Locations.Add(createLocation);
         _context.SaveChangesAsync();
@@ -89,7 +89,7 @@ public class LocationController : ControllerBase
         return NoContent();
     }
 
-    private bool LocationExists(long id)
+    private bool LocationExists(Guid id)
     {
         return _context.Locations.Any(e => e.Id == id);
     }

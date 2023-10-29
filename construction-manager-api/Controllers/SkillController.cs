@@ -8,8 +8,8 @@ namespace construction_manager_api.Controllers;
 [ApiController]
 public class SkillController : ControllerBase
 {
-    private readonly ConstructionManagerContext _context;
-    public SkillController(ConstructionManagerContext context)
+    private readonly ConstructionManagerDbContext _context;
+    public SkillController(ConstructionManagerDbContext context)
     {
         _context = context;
     }
@@ -64,7 +64,7 @@ public class SkillController : ControllerBase
     public ActionResult<Skill> PostSkill(Skill skill)
     {
         //Create new skill using attributes of skill ogj
-        var createSkill = new Skill(skill.Id, skill.Name);
+        var createSkill = new Skill();
 
         _context.Skills.Add(createSkill);
         _context.SaveChangesAsync();

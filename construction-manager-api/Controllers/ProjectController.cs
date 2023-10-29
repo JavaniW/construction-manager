@@ -8,8 +8,8 @@ namespace construction_manager_api.Controllers;
 [ApiController]
 public class ProjectController : ControllerBase
 {
-    private readonly ConstructionManagerContext _context;
-    public ProjectController(ConstructionManagerContext context)
+    private readonly ConstructionManagerDbContext _context;
+    public ProjectController(ConstructionManagerDbContext context)
     {
         _context = context;
     }
@@ -46,11 +46,11 @@ public class ProjectController : ControllerBase
         }
 
         projectUpdate.Expenses = project.Expenses;
-        projectUpdate.LocationId = project.LocationId;
+        //projectUpdate.LocationId = project.LocationId;
         projectUpdate.Location = project.Location;
         projectUpdate.RequiredSkills = project.RequiredSkills;
         projectUpdate.Employees = project.Employees;
-        projectUpdate.RequiredEquipments = project.RequiredEquipments;
+        //projectUpdate.RequiredEquipments = project.RequiredEquipments;
 
         try
         {
@@ -69,7 +69,7 @@ public class ProjectController : ControllerBase
     public ActionResult<Project> PostProject(Project project)
     {
         //Create new project using attributes of project ogj
-        var createProject = new Project(project.Id, project.Expenses, project.LocationId, project.Location, project.RequiredSkills, project.Employees, project.RequiredEquipments);
+        var createProject = new Project();
 
         _context.Projects.Add(createProject);
         _context.SaveChangesAsync();

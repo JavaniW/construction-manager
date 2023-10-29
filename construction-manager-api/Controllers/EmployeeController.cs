@@ -8,8 +8,8 @@ namespace construction_manager_api.Controllers;
 [ApiController]
 public class EmployeeController : ControllerBase
 {
-    private readonly ConstructionManagerContext _context;
-    public EmployeeController(ConstructionManagerContext context)
+    private readonly ConstructionManagerDbContext _context;
+    public EmployeeController(ConstructionManagerDbContext context)
     {
         _context = context;
     }
@@ -48,9 +48,9 @@ public class EmployeeController : ControllerBase
         employeeUpdate.Name = employee.Name;
         employeeUpdate.Title = employee.Title;
         employeeUpdate.Payroll = employee.Payroll;
-        employeeUpdate.DepartmentId = employee.DepartmentId;
+        //employeeUpdate.DepartmentId = employee.DepartmentId;
         employeeUpdate.Department = employee.Department;
-        employeeUpdate.ProjectId = employee.ProjectId;
+        //employeeUpdate.ProjectId = employee.ProjectId;
 
         try
         {
@@ -69,7 +69,7 @@ public class EmployeeController : ControllerBase
     public ActionResult<Employee> PostEmployee(Employee employee)
     {
         //Create new employee using attributes of employee ogj
-        var createEmployee = new Employee(employee.Name, employee.Title, employee.Payroll, employee.Id, employee.Department, employee.ProjectId, employee.Skills);
+        var createEmployee = new Employee();
 
         _context.Employees.Add(createEmployee);
         _context.SaveChangesAsync();

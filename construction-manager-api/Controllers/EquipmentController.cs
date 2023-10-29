@@ -8,8 +8,8 @@ namespace construction_manager_api.Controllers;
 [ApiController]
 public class EquipmentController : ControllerBase
 {
-    private readonly ConstructionManagerContext _context;
-    public EquipmentController(ConstructionManagerContext context)
+    private readonly ConstructionManagerDbContext _context;
+    public EquipmentController(ConstructionManagerDbContext context)
     {
         _context = context;
     }
@@ -64,7 +64,7 @@ public class EquipmentController : ControllerBase
     public ActionResult<Equipment> PostEquipment(Equipment equipment)
     {
         //Create new equipment using attributes of equipment ogj
-        var createEquipment = new Equipment(equipment.Id, equipment.Name);
+        var createEquipment = new Equipment();
 
         _context.Equipments.Add(createEquipment);
         _context.SaveChangesAsync();
