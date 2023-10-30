@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace construction_manager_api;
+﻿namespace construction_manager_api.Models;
 
 public class Department
 {

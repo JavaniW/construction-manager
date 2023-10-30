@@ -26,7 +26,7 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
             .OnDelete(DeleteBehavior.SetNull)
             .HasConstraintName("fk_projects_location_id_locations");
 
-        builder.HasMany(d => d.Equipment).WithMany(p => p.Projects)
+        builder.HasMany(d => d.Equipment).WithMany()
             .UsingEntity<Dictionary<string, object>>(
                 "ProjectsEquipments",
                 r => r.HasOne<Equipment>().WithMany()

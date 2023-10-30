@@ -12,6 +12,9 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
 
         builder.ToTable("departments");
 
+        builder.Property(e => e.Name)
+            .HasMaxLength(255)
+            .HasColumnName("name");
         builder.Property(e => e.Id).HasColumnName("id");
         builder.Property(e => e.Name)
             .HasMaxLength(50)

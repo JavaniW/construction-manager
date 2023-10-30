@@ -1,3 +1,4 @@
+using construction_manager_api.DTOs.Employee;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using construction_manager_api.Models;
@@ -16,86 +17,110 @@ public class EmployeeController : ControllerBase
 
     // GET: api/Employee
     [HttpGet]
-    public Task<List<Employee>> GetEmployees() =>
+    public async Task<ActionResult<List<EmployeeDto>>> GetEmployees() {
         //Create list of all employees from _context and return list
-        _context.Employees.OrderBy(n => n.Name).ToListAsync();
+        return await _context.Employees
+            .OrderBy(n => n.Name)
+            .Include(e => e.Department)
+            .Include(e => e.Project)
+            .Include(e => e.Skills)
+            .Select(e => new EmployeeDto
+        {
+            Id = e.Id,
+            Name = e.Name,
+            Title = e.Title,
+            Payroll = e.Payroll,
+            Department = e.Department == null ? null : e.Department.Name,
+            Project = e.Project == null ? null : e.Project.Name,
+            Skills = e.Skills.Select(s => s.Name).ToList()
+        }).ToListAsync();
+    }
 
     // GET: api/Employee/1
     [HttpGet("{id}")]
-    public IActionResult GetEmployee(int id)
+    public async Task<ActionResult<EmployeeDto>> GetEmployee(Guid id)
     {
         //Return specific employee by id
-        var employee = _context.Employees.Find(id);
-        return employee == null ? NotFound() : Ok(employee);
+        var employee = await _context.Employees
+            .Include(e => e.Department)
+            .Include(e => e.Project)
+            .Include(e => e.Skills)
+            .FirstOrDefaultAsync(e => e.Id.Equals(id));
+        
+        if (employee is null) return NotFound();
+        var employeeDto =new EmployeeDto
+        {
+            Id = employee.Id,
+            Name = employee.Name,
+            Title = employee.Title,
+            Payroll = employee.Payroll,
+            Department = employee.Department?.Name,
+            Project = employee.Project?.Name,
+            Skills = employee.Skills.Select(s => s.Name).ToList()
+        };
+        return Ok(employeeDto);
     }
 
     // PUT: api/Employee/2
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutEmployee(Guid id, Employee employee)
+    public async Task<IActionResult> PutEmployee(Guid id, ModifyEmployeeRequest request)
     {
-        //Udate employee with passed id using the attributes of the passed employee obj
-        if (!id.Equals(employee.Id))
-        {
-            return BadRequest();
-        }
-
         var employeeUpdate = await _context.Employees.FindAsync(id);
         if (employeeUpdate == null)
         {
             return NotFound();
         }
+        
+        var department =  await _context.Departments.FindAsync(request.DepartmentId);
+        var project = await _context.Projects.FindAsync(request.ProjectId);
 
-        employeeUpdate.Name = employee.Name;
-        employeeUpdate.Title = employee.Title;
-        employeeUpdate.Payroll = employee.Payroll;
+        employeeUpdate.Name = request.Name;
+        employeeUpdate.Title = request.Title;
+        employeeUpdate.Payroll = request.Payroll;
         //employeeUpdate.DepartmentId = employee.DepartmentId;
-        employeeUpdate.Department = employee.Department;
+        employeeUpdate.Department = department;
+        employeeUpdate.Project = project;
         //employeeUpdate.ProjectId = employee.ProjectId;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException) when (!EmployeeExists(id))
-        {
-            return NotFound();
-        }
-
+        await _context.SaveChangesAsync();
         return NoContent();
     }
 
     // POST: api/Employee
     [HttpPost]
-    public ActionResult<Employee> PostEmployee(Employee employee)
+    public async Task<ActionResult> PostEmployee(CreateEmployeeRequest request)
     {
+        var department =  await _context.Departments.FindAsync(request.DepartmentId);
+        var project = await _context.Projects.FindAsync(request.ProjectId);
         //Create new employee using attributes of employee ogj
-        var createEmployee = new Employee();
+        var employee = new Employee
+        {
+            Name = request.Name,
+            Title = request.Title,
+            Payroll = request.Payroll,
+            Department = department,
+            Project = project
+        };
 
-        _context.Employees.Add(createEmployee);
-        _context.SaveChangesAsync();
+        _context.Employees.Add(employee);
+        await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetEmployee), new {id = createEmployee.Id});
+        return CreatedAtAction(nameof(GetEmployee), new {id = employee.Id});
     }
 
     // DELETE: api/Employee/3
     [HttpDelete("{id}")]
-    public ActionResult<Employee> DeleteEmployee(int id)
+    public async Task<ActionResult> DeleteEmployee(Guid id)
     {
         //Delete employee with passed id
-        var deleteEmployee = _context.Employees.Find(id);
+        var deleteEmployee = await _context.Employees.FindAsync(id);
         if (deleteEmployee == null)
         {
             return NotFound();
         }
 
         _context.Employees.Remove(deleteEmployee);
-        _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         return NoContent();
-    }
-
-    private bool EmployeeExists(Guid id)
-    {
-        return _context.Employees.Any(e => e.Id == id);
     }
 }

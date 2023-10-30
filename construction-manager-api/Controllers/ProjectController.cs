@@ -1,3 +1,4 @@
+using construction_manager_api.DTOs.Project;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using construction_manager_api.Models;
@@ -16,70 +17,108 @@ public class ProjectController : ControllerBase
 
     // GET: api/Project
     [HttpGet]
-    public Task<List<Project>> GetProjects() =>
-        //Create list of all projects from _context and return list
-        _context.Projects.OrderBy(n => n.Id).ToListAsync();
+    public async Task<ActionResult<ICollection<ProjectDto>>> GetProjects()
+    {
+        var projects = await _context.Projects
+            .OrderBy(n => n.Id)
+            .Include(p => p.Employees)
+            .Include(p => p.RequiredSkills)
+            .Include(p => p.Location)
+            .Select(p => new ProjectDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Expenses = p.Expenses,
+                Employees = p.Employees.Select(e => e.Name).ToList(),
+                Location = p.Location == null ? null : p.Location.Name,
+                RequiredSkills = p.RequiredSkills.Select(s => s.Name).ToList()
+            }).ToListAsync();
+        return Ok(projects);
+    }
+    
 
     // GET: api/Project/1
     [HttpGet("{id}")]
-    public IActionResult GetProject(int id)
+    public async Task<IActionResult> GetProject(Guid id)
     {
         //Return specific project by id
-        var project = _context.Projects.Find(id);
-        return project == null ? NotFound() : Ok(project);
+        var project = await _context.Projects
+            .Include(p => p.Employees)
+            .Include(p => p.RequiredSkills)
+            .Include(p => p.Location)
+            .FirstOrDefaultAsync();
+        if (project == null) return NotFound();
+        var projectDto = new ProjectDto()
+        {
+            Id = project.Id,
+            Name = project.Name,
+            Expenses = project.Expenses,
+            Employees = project.Employees.Select(e => e.Name).ToList(),
+            Location = project.Location?.Name,
+            RequiredSkills = project.RequiredSkills.Select(s => s.Name).ToList()
+        };
+        return Ok(projectDto);
     }
 
     // PUT: api/Project/2
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutProject(Guid id, Project project)
+    public async Task<IActionResult> PutProject(Guid id, ModifyProjectRequest request)
     {
-        //Udate project with passed id using the attributes of the passed project obj
-        if (!id.Equals(project.Id))
-        {
-            return BadRequest();
-        }
-
         var projectUpdate = await _context.Projects.FindAsync(id);
         if (projectUpdate == null)
         {
             return NotFound();
         }
 
-        projectUpdate.Expenses = project.Expenses;
-        //projectUpdate.LocationId = project.LocationId;
-        projectUpdate.Location = project.Location;
-        projectUpdate.RequiredSkills = project.RequiredSkills;
-        projectUpdate.Employees = project.Employees;
-        //projectUpdate.RequiredEquipments = project.RequiredEquipments;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException) when (!ProjectExists(id))
-        {
-            return NotFound();
-        }
+        var employees = await _context.Employees
+            .Where(e => request.Employees != null && request.Employees.Contains(e.Id))
+            .ToListAsync();
+        var skills = await _context.Skills
+            .Where(e => request.RequiredSkills != null && request.RequiredSkills.Contains(e.Id))
+            .ToListAsync();
+        var location = await _context.Locations
+            .FindAsync(request.Location);
+        projectUpdate.Expenses = request.Expenses;
+        projectUpdate.Location = location;
+        projectUpdate.RequiredSkills = skills;
+        projectUpdate.Employees = employees;
+        
+        await _context.SaveChangesAsync();
 
         return NoContent();
     }
 
     // POST: api/Project
     [HttpPost]
-    public ActionResult<Project> PostProject(Project project)
+    public async Task<ActionResult> PostProject(CreateProjectRequest request)
     {
+        var employees = await _context.Employees
+            .Where(e => request.Employees != null && request.Employees.Contains(e.Id))
+            .ToListAsync();
+        var skills = await _context.Skills
+            .Where(e => request.RequiredSkills != null && request.RequiredSkills.Contains(e.Id))
+            .ToListAsync();
+        var location = await _context.Locations
+            .FindAsync(request.Location);
         //Create new project using attributes of project ogj
-        var createProject = new Project();
+        var createProject = new Project
+        {
+            Name = request.Name,
+            Expenses = request.Expenses,
+            Location = location,
+            RequiredSkills = skills,
+            Employees = employees
+        };
 
         _context.Projects.Add(createProject);
-        _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetProject), new {id = createProject.Id});
     }
 
     // DELETE: api/Project/3
     [HttpDelete("{id}")]
-    public ActionResult<Project> DeleteProject(int id)
+    public async Task<ActionResult<Project>> DeleteProject(int id)
     {
         //Delete project with passed id
         var deleteProject = _context.Projects.Find(id);
@@ -89,13 +128,8 @@ public class ProjectController : ControllerBase
         }
 
         _context.Projects.Remove(deleteProject);
-        _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         return NoContent();
-    }
-
-    private bool ProjectExists(Guid id)
-    {
-        return _context.Projects.Any(e => e.Id == id);
     }
 }
