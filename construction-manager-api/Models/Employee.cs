@@ -1,21 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace construction_manager_api;
+﻿namespace construction_manager_api.Models;
 
 public class Employee
 {
-    public Guid Id { get; set; }
+    public Guid Id { get;} = Guid.NewGuid();
 
     public string Name { get; set; } = null!;
 
     public string Title { get; set; } = null!;
 
     public decimal Payroll { get; set; }
-
-    // public int? DepartmentId { get; set; }
-
-    // public Guid? ProjectId { get; set; }
 
     public virtual Department? Department { get; set; }
 

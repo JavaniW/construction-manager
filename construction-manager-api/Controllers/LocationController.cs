@@ -1,3 +1,4 @@
+using construction_manager_api.DTOs.Location;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using construction_manager_api.Models;
@@ -16,81 +17,78 @@ public class LocationController : ControllerBase
 
     // GET: api/Location
     [HttpGet]
-    public Task<List<Location>> GetLocations() =>
+    public async Task<ActionResult<ICollection<LocationDto>>> GetLocations()
+    {
         //Create list of all locations from _context and return list
-        _context.Locations.OrderBy(n => n.Name).ToListAsync();
+        var locations = await _context.Locations.OrderBy(n => n.Name).Select(l => new LocationDto
+        {
+            Id = l.Id,
+            Name = l.Name
+        }).ToListAsync();
+        return Ok(locations);
+    }
 
     // GET: api/Location/1
     [HttpGet("{id}")]
-    public IActionResult GetLocation(int id)
+    public async Task<ActionResult<LocationDto>> GetLocation(Guid id)
     {
         //Return specific location by id
-        var location = _context.Locations.Find(id);
-        return location == null ? NotFound() : Ok(location);
+        var location = await _context.Locations.FindAsync(id);
+        if (location == null) return NotFound();
+        var locationDto = new LocationDto()
+        {
+            Id = location.Id,
+            Name = location.Name
+        };
+        return Ok(locationDto);
     }
 
     // PUT: api/Location/2
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutLocation(Guid id, Location location)
+    public async Task<IActionResult> PutLocation(Guid id, ModifyLocationRequest request)
     {
-        //Udate location with passed id using the attributes of the passed location obj
-        if (!id.Equals(location.Id))
-        {
-            return BadRequest();
-        }
-
         var locationUpdate = await _context.Locations.FindAsync(id);
         if (locationUpdate == null)
         {
             return NotFound();
         }
 
-        locationUpdate.Name = location.Name;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException) when (!LocationExists(id))
-        {
-            return NotFound();
-        }
-
+        locationUpdate.Name = request.Name;
+        
+        await _context.SaveChangesAsync();
         return NoContent();
     }
 
     // POST: api/Location
     [HttpPost]
-    public ActionResult<Location> PostLocation(Location location)
+    public async Task<ActionResult> PostLocation(CreateLocationRequest request)
     {
         //Create new location using attributes of location ogj
-        var createLocation = new Location();
+        var createLocation = new Location
+        {
+            Name = request.Name
+        };
 
         _context.Locations.Add(createLocation);
-        _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetLocation), new {id = createLocation.Id});
     }
 
     // DELETE: api/Location/3
     [HttpDelete("{id}")]
-    public ActionResult<Location> DeleteLocation(int id)
+    public async Task<ActionResult> DeleteLocation(int id)
     {
         //Delete location with passed id
-        var deleteLocation = _context.Locations.Find(id);
+        var deleteLocation = await _context.Locations.FindAsync(id);
         if (deleteLocation == null)
         {
             return NotFound();
         }
 
         _context.Locations.Remove(deleteLocation);
-        _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         return NoContent();
-    }
-
-    private bool LocationExists(Guid id)
-    {
-        return _context.Locations.Any(e => e.Id == id);
     }
 }

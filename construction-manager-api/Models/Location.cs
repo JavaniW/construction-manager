@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace construction_manager_api;
+﻿namespace construction_manager_api.Models;
 
 public class Location
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; } = Guid.NewGuid();
 
     public string Name { get; set; } = null!;
-
-    // public virtual ICollection<Project> Projects { get; set; } = new List<Project>();
 }

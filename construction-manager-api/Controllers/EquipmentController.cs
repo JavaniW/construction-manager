@@ -1,3 +1,5 @@
+using construction_manager_api.DTOs.Employee;
+using construction_manager_api.DTOs.Equipment;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using construction_manager_api.Models;
@@ -16,81 +18,76 @@ public class EquipmentController : ControllerBase
 
     // GET: api/Equipment
     [HttpGet]
-    public Task<List<Equipment>> GetEquipments() =>
+    public async Task<ActionResult<ICollection<EquipmentDto>>> GetEquipments() {
         //Create list of all equipments from _context and return list
-        _context.Equipments.OrderBy(n => n.Name).ToListAsync();
+        var equipments = await _context.Equipments.OrderBy(n => n.Name).Select(e => new EquipmentDto
+        {
+            Id = e.Id,
+            Name = e.Name
+        }).ToListAsync();
+        return Ok(equipments);
+    }
 
     // GET: api/Equipment/1
     [HttpGet("{id}")]
-    public IActionResult GetEquipment(int id)
+    public async Task<ActionResult<ICollection<EquipmentDto>>> GetEquipment(Guid id)
     {
         //Return specific equipment by id
-        var equipment = _context.Equipments.Find(id);
-        return equipment == null ? NotFound() : Ok(equipment);
+        var equipment = await _context.Equipments.FindAsync(id);
+        if (equipment == null) return NotFound();
+        var equipmentDto = new EquipmentDto
+        {
+            Id = equipment.Id,
+            Name = equipment.Name
+        };
+        return Ok(equipmentDto);
     }
 
     // PUT: api/Equipment/2
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutEquipment(Guid id, Equipment equipment)
+    public async Task<IActionResult> PutEquipment(Guid id, ModifyEquipmentRequest request)
     {
-        //Udate equipment with passed id using the attributes of the passed equipment obj
-        if (!id.Equals(equipment.Id))
-        {
-            return BadRequest();
-        }
-
         var equipmentUpdate = await _context.Equipments.FindAsync(id);
         if (equipmentUpdate == null)
         {
             return NotFound();
         }
-
-        equipmentUpdate.Name = equipment.Name;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException) when (!EquipmentExists(id))
-        {
-            return NotFound();
-        }
+        equipmentUpdate.Name = request.Name;
+        await _context.SaveChangesAsync();
 
         return NoContent();
     }
 
     // POST: api/Equipment
     [HttpPost]
-    public ActionResult<Equipment> PostEquipment(Equipment equipment)
+    public async Task<ActionResult> PostEquipment(CreateEquipmentRequest request)
     {
         //Create new equipment using attributes of equipment ogj
-        var createEquipment = new Equipment();
+        var createEquipment = new Equipment
+        {
+            Name = request.Name
+        };
 
         _context.Equipments.Add(createEquipment);
-        _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetEquipment), new {id = createEquipment.Id});
     }
 
     // DELETE: api/Equipment/3
     [HttpDelete("{id}")]
-    public ActionResult<Equipment> DeleteEquipment(int id)
+    public async Task<ActionResult> DeleteEquipment(Guid id)
     {
         //Delete equipment with passed id
-        var deleteEquipment = _context.Equipments.Find(id);
+        var deleteEquipment = await _context.Equipments.FindAsync(id);
         if (deleteEquipment == null)
         {
             return NotFound();
         }
 
         _context.Equipments.Remove(deleteEquipment);
-        _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         return NoContent();
-    }
-
-    private bool EquipmentExists(Guid id)
-    {
-        return _context.Equipments.Any(e => e.Id == id);
     }
 }
